@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+.env*
+!.env.example
+*.db
+*.db-*
+.vercel
+.DS_Store
+.seed-credentials.txt
+.claude
