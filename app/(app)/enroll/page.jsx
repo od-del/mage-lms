@@ -10,7 +10,9 @@ export default function Enroll() {
   const key = [loaded, cur, mentor].join('|');
   const ok = !!loaded && emp.trim() === loaded && !!cur && !!mentor;
   const step = !loaded || emp.trim() !== loaded ? 1 : !ok ? 2 : 3;
-  const m = opt && opt.mentors.find(x => x.id === mentor), c = opt && opt.curricula.find(x => x.id === cur);
+  const c = opt && opt.curricula.find(x => x.id === cur);
+  const pool = c ? c.mentors : [];
+  const m = pool.find(x => x.id === mentor);
 
   const load = async () => {
     const id = emp.trim();
@@ -32,10 +34,10 @@ export default function Enroll() {
       else { setPreviewed(''); toast('Pendaftaran ' + r.enrollmentId + ' dibuat'); setOpt(null); setLoaded(''); setEmp(''); setCur(''); setMentor(''); }
     } catch (e) { setMsg({ err: true, text: e.message }); }
   };
-  const mentors = opt ? opt.mentors.filter(x => [x.name, x.job, x.outlet].join(' ').toLowerCase().includes(q.trim().toLowerCase())) : [];
+  const mentors = pool.filter(x => [x.name, x.job, x.outlet].join(' ').toLowerCase().includes(q.trim().toLowerCase()));
   const r = msg && msg.result;
   return (<>
-    <Head title="Daftarkan Peserta" sub="Daftarkan karyawan ke kurikulum; tugas stage pertama dan mentornya dibuat sekaligus." />
+    <Head title="Kelola Peserta" sub="Daftarkan karyawan ke kurikulum; tugas stage pertama dan mentornya dibuat sekaligus." />
     <div className="two">
       <div className="card">
         <div className="steps">{['Karyawan', 'Kurikulum & mentor', 'Pratinjau & buat'].map((t, i) =>
@@ -49,17 +51,19 @@ export default function Enroll() {
         {opt && step > 1 ? <div className="person"><div className="avatar">{initials(opt.employee.name)}</div>
           <div><b>{opt.employee.name}</b><div className="small muted">{[opt.employee.id, opt.employee.job, opt.employee.outlet].filter(Boolean).join(' · ')}</div></div></div> : null}
         <label className="f" htmlFor="cur">Kurikulum</label>
-        <select id="cur" className="input" disabled={step === 1} value={cur} onChange={e => { setCur(e.target.value); setPreviewed(''); }}>
+        <select id="cur" className="input" disabled={step === 1} value={cur} onChange={e => { setCur(e.target.value); setMentor(''); setPreviewed(''); }}>
           <option value="">{step === 1 ? 'Cari karyawan terlebih dahulu' : 'Pilih kurikulum'}</option>
           {opt ? opt.curricula.map(x => <option key={x.id} value={x.id}>{x.name}</option>) : null}
         </select>
         <label className="f" htmlFor="mq">Mentor</label>
-        <input id="mq" className="input" type="search" placeholder="Cari nama mentor…" disabled={step === 1} value={q} onChange={e => setQ(e.target.value)} />
+        <input id="mq" className="input" type="search" placeholder="Cari nama mentor…" disabled={step === 1 || !c} value={q} onChange={e => setQ(e.target.value)} />
         <div style={{ marginTop: 8 }}>
-          <select className="input" aria-label="Pilih mentor" disabled={step === 1} value={mentor} onChange={e => { setMentor(e.target.value); setPreviewed(''); }}>
-            <option value="">Pilih mentor</option>
+          <select className="input" aria-label="Pilih mentor" disabled={step === 1 || !c} value={mentor} onChange={e => { setMentor(e.target.value); setPreviewed(''); }}>
+            <option value="">{!c ? 'Pilih kurikulum terlebih dahulu' : pool.length ? 'Pilih mentor' : 'Belum ada mentor berwenang'}</option>
             {mentors.map(x => <option key={x.id} value={x.id}>{x.name}{[x.job, x.outlet].filter(Boolean).length ? ' — ' + [x.job, x.outlet].filter(Boolean).join(' · ') : ''}</option>)}
           </select>
+          {c && !pool.length ? <div style={{ marginTop: 8 }}><Notice err>Belum ada mentor/trainer yang berwenang membimbing {c.name}. Tambahkan di <Link href="/master?tab=mentors">Master Data → Mentor & Trainer</Link>.</Notice></div>
+            : c ? <div className="small muted" style={{ marginTop: 4 }}>Hanya mentor/trainer yang berwenang untuk kurikulum ini (Master Data).</div> : null}
         </div>
         <div className="row" style={{ marginTop: 18 }}>
           <Busy className="btn" busyText="Memeriksa…" disabled={!ok} onClick={() => run(true)}>Pratinjau</Busy>

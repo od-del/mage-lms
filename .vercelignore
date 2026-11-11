@@ -5,3 +5,4 @@ node_modules
 .seed-credentials.txt
 .claude
 *.db
+backups

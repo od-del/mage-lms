@@ -1,12 +1,27 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { Head, Icon, Pill, Notice, Skeleton, Empty, Modal, Busy, ROLE_LABEL, api, toast, confirmBox, useApi } from '@/components/ui';
 import { PasswordResult } from '@/components/lms';
 import { useShell } from '@/components/Shell';
 
+// Dropdown dari master data; nilai lama yang belum ada di master tetap tampil supaya tidak hilang.
+function MasterSelect({ value, onChange, list, empty, label }) {
+  const known = list.some(x => x.name.toLowerCase() === String(value || '').toLowerCase());
+  return (
+    <select className="input" aria-label={label} value={value} onChange={onChange}>
+      <option value="">{empty}</option>
+      {value && !known ? <option value={value}>{value} (belum ada di master)</option> : null}
+      {list.map(x => <option key={x.id} value={x.name}>{x.name}{x.location ? ' — ' + x.location : ''}</option>)}
+    </select>);
+}
+
 function UserForm({ u, onClose, onSaved }) {
   const [v, setV] = useState(u ? { ...u, isNew: false } : { id: '', name: '', email: '', job: '', outlet: '', role: '', active: true, isNew: true });
   const [err, setErr] = useState('');
+  const { data: m } = useApi('masterData');
+  const positions = m ? m.positions.filter(x => x.active || x.name === v.job) : [];
+  const outlets = m ? m.outlets.filter(x => x.active || x.name === v.outlet) : [];
   const set = k => e => setV(s => ({ ...s, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
   const save = async () => { try { await api('userSave', v); toast('Pengguna disimpan'); onSaved(); onClose(); } catch (e) { setErr(e.message); } };
   return (
@@ -17,9 +32,10 @@ function UserForm({ u, onClose, onSaved }) {
       </div>
       <label className="f">Email (untuk login)</label><input className="input" type="email" value={v.email} onChange={set('email')} placeholder="nama@perusahaan.com" />
       <div className="grid2">
-        <div><label className="f">Jabatan</label><input className="input" value={v.job} onChange={set('job')} /></div>
-        <div><label className="f">Outlet</label><input className="input" value={v.outlet} onChange={set('outlet')} /></div>
+        <div><label className="f">Jabatan</label>{m ? <MasterSelect label="Jabatan" value={v.job} onChange={set('job')} list={positions} empty="— Pilih jabatan —" /> : <div className="input sk" style={{ height: 40 }} />}</div>
+        <div><label className="f">Outlet</label>{m ? <MasterSelect label="Outlet" value={v.outlet} onChange={set('outlet')} list={outlets} empty="— Pilih outlet —" /> : <div className="input sk" style={{ height: 40 }} />}</div>
       </div>
+      <div className="small muted" style={{ marginTop: 4 }}>Daftar jabatan & outlet diatur di <Link href="/master">Master Data</Link>.</div>
       <label className="f">Akses admin</label>
       <select className="input" value={v.role} onChange={set('role')}><option value="">Tidak ada (trainee / mentor)</option><option value="ADMIN">Admin/HR</option><option value="SUPER_ADMIN">Super Admin</option></select>
       <div className="small muted" style={{ marginTop: 4 }}>Peran Mentor dan Trainee otomatis dari data pendaftaran.</div>

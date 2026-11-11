@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 import { Icon, Pill, Progress, initials, fmtDate, api, toast, confirmBox, Modal, Busy } from './ui';
 import { useShell } from './Shell';
 
-export const RES_ICON = { MODULE: 'file', VIDEO: 'video', SOP: 'doc', PRE_TEST: 'clip', POST_TEST: 'clip' };
-export const KIND_LABEL = { MODULE: 'Modul training', SOP: 'SOP', VIDEO: 'Video', PRE_TEST: 'Pre-test', POST_TEST: 'Post-test' };
+export const RES_ICON = { MODULE: 'file', SOP: 'doc', VIDEO: 'video', OTHER_DOC: 'file', IT_SUPPORT: 'tool', PRE_TEST: 'clip', POST_TEST: 'clip' };
+export const KIND_LABEL = { MODULE: 'Modul training', SOP: 'SOP', VIDEO: 'Video', OTHER_DOC: 'Other Document', IT_SUPPORT: 'IT Support Management', PRE_TEST: 'Pre-test', POST_TEST: 'Post-test' };
+// Kelompok filter di Documents & Kelola Materi (diturunkan dari format).
+export const CATEGORY_LABEL = { DOCUMENT: 'Document', IT_TOOL: 'IT Support Management' };
 export const isTest = k => k === 'PRE_TEST' || k === 'POST_TEST';
 
 export function statusOf(e) {

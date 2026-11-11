@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Icon, Pill, Notice, Progress, initials, fmtDate, fmtDateTime, pct, useApi } from '@/components/ui';
+import { Icon, Pill, Notice, Progress, initials, fmtDate, fmtDateTime, pct, useApi, api, toast } from '@/components/ui';
 import { ResList, ActionButtons, DueChip, BackLink } from '@/components/lms';
 import { useShell, useCrumbs } from '@/components/Shell';
 
@@ -39,6 +39,30 @@ function History({ items }) {
     </details>);
 }
 
+// Pendamping praktik: trainee memilih mentor/trainer yang bertugas pada hari praktik.
+function PracticeMentor({ a, onDone }) {
+  const [busy, setBusy] = useState(false);
+  const choose = async mentorId => {
+    setBusy(true);
+    try {
+      const r = await api('practiceMentorSet', { assignmentId: a.assignmentId, mentorId });
+      toast(r.mentor ? 'Pendamping praktik: ' + r.mentor.name : 'Pendamping praktik dihapus'); onDone && onDone();
+    } catch (e) { toast(e.message, true); } finally { setBusy(false); }
+  };
+  if (!a.mentorOptions) return a.practiceMentor ? <div className="act-meta"><span><span className="k">Pendamping praktik: </span><b>{a.practiceMentor.name}</b></span></div> : null;
+  return (
+    <div className="practice-pick">
+      <label className="f" htmlFor={'pm-' + a.id} style={{ marginTop: 0 }}>Mentor/trainer pendamping praktik</label>
+      {a.mentorOptions.length ? <>
+        <select id={'pm-' + a.id} className="input" disabled={busy} value={a.practiceMentor?.id || ''} onChange={e => choose(e.target.value)}>
+          <option value="">— Pilih pendamping —</option>
+          {a.mentorOptions.map(m => <option key={m.id} value={m.id}>{m.name}{[m.job, m.outlet].filter(Boolean).length ? ' — ' + [m.job, m.outlet].filter(Boolean).join(' · ') : ''}</option>)}
+        </select>
+        <div className="small muted" style={{ marginTop: 4 }}>{a.practiceMentor ? <>Pendamping: <b>{a.practiceMentor.name}</b>. Bisa diganti sampai praktik dinyatakan lulus.</> : 'Pilih mentor/trainer yang bertugas pada hari kamu praktik. Ia bisa menilai praktik ini.'}</div>
+      </> : <div className="small muted">Belum ada mentor/trainer yang tersedia untuk praktik ini. Hubungi admin.</div>}
+    </div>);
+}
+
 function ActCard({ a, onDone }) {
   const st = a.status === 'Completed' ? 'done' : a.status === 'Assigned' ? 'open' : 'locked';
   const hasTest = a.preRequired || a.postRequired || has(a.pre) || has(a.post);
@@ -61,6 +85,7 @@ function ActCard({ a, onDone }) {
         {hint ? <div className="act-hint">{hint}</div> : null}
         {meta.length ? <div className="act-meta">{meta}</div> : null}
         <ResList list={a.resources} assignmentId={a.assignmentId} />
+        {a.rule === 'MENTOR_PASSED' && st !== 'locked' ? <PracticeMentor a={a} onDone={onDone} /> : null}
         <ActionButtons a={a} onDone={onDone} />
         <History items={a.history} />
       </div>

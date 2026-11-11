@@ -2,16 +2,15 @@
 //   npm run db:seed            → hanya jika database masih kosong
 //   npm run db:seed -- --reset → hapus semua data lalu isi ulang
 import fs from 'node:fs';
-import { db, loadAll, insert, write } from '../lib/db.js';
-import { SCHEMA } from '../lib/schema.js';
+import { db, loadAll, insert, write, upgradeSchema } from '../lib/db.js';
 import { hashPassword, tempPassword } from '../lib/password.js';
 import { recompute } from '../lib/lms.js';
 
 const reset = process.argv.includes('--reset');
-await db().batch(SCHEMA, 'write');
+await upgradeSchema();
 const [{ n }] = (await db().execute('SELECT COUNT(*) AS n FROM users')).rows.map(r => ({ n: r[0] }));
 if (n > 0 && !reset) { console.log('Database sudah berisi data. Pakai --reset untuk mengisi ulang.'); process.exit(0); }
-if (reset) await db().batch(['quiz_attempts', 'certificates', 'assignments', 'mentor_assignments', 'enrollments', 'quiz_questions', 'resources', 'activities', 'stages', 'curricula', 'audit_log', 'users'].map(t => 'DELETE FROM ' + t), 'write');
+if (reset) await db().batch(['resource_links', 'mentors', 'positions', 'outlets', 'meta', 'quiz_attempts', 'certificates', 'assignments', 'mentor_assignments', 'enrollments', 'quiz_questions', 'resources', 'activities', 'stages', 'curricula', 'audit_log', 'users'].map(t => 'DELETE FROM ' + t), 'write');
 
 const creds = [];
 const user = (id, name, email, job, outlet, role = '') => {
@@ -142,6 +141,9 @@ await write([...stmts.filter(s => /^INSERT INTO (enrollments|mentor_assignments|
   ...stmts.filter(s => /^UPDATE enrollments/.test(s.sql.trim())), ...finalRows, ...attempts]);
 
 fs.writeFileSync(new URL('../.seed-credentials.txt', import.meta.url), '# Akun contoh Mage LMS (jangan di-commit)\nROLE\tEMAIL\tPASSWORD\n' + creds.join('\n') + '\n', { mode: 0o600 });
+// Isi ulang master jabatan/outlet/mentor dari data contoh & pindahkan materi ke perpustakaan.
+await db().execute("DELETE FROM meta WHERE key = 'v2_masters'");
+await upgradeSchema();
 const check = await loadAll();
 console.log(`Seed selesai: ${check.users.length} pengguna, ${check.enrollments.length} pendaftaran, ${check.assignments.length} tugas, ${check.certificates.length} sertifikat.`);
 console.log('Akun & password contoh: .seed-credentials.txt');

@@ -60,20 +60,21 @@ export default function Home() {
       })}</div>
     </> : null}
     {k ? <>
-      <div className="section-title"><h2>Ringkasan LMS</h2><span className="spacer" /><Link className="btn link" href="/dashboard">Buka dashboard →</Link></div>
+      <div className="section-title"><h2>Ringkasan LMS</h2></div>
       <div className="stats">{[['Total peserta', k.enrollments, ''], ['Sedang berjalan', k.active, ''], ['Rata-rata progress', k.avgProgress + '%', ''], ['Aktivitas terlambat', k.overdue, 'red'], ['Menunggu mentor', k.pendingMentor, 'red']]
         .map(([l, v, c]) => <div key={l} className={'stat clickable' + (c && v ? ' red' : '')} role="button" tabIndex={0} title="Buka dashboard" onClick={() => router.push('/dashboard')} onKeyDown={e => { if (e.key === 'Enter') router.push('/dashboard'); }}><b>{v}</b><span>{l}</span></div>)}</div>
     </> : null}
     {!isT && !isM && me.roles.includes('ADMIN') ? <>
       <div className="section-title"><h2>Pintasan</h2></div>
       <div className="mini">
-        <Tile href="/enroll" icon="plus" title="Daftarkan peserta" sub="Buat pendaftaran kurikulum baru" />
+        <Tile href="/enroll" icon="plus" title="Kelola peserta" sub="Buat pendaftaran kurikulum baru" />
         <Tile href="/dashboard" icon="dash" title="Lihat dashboard" sub="Progres, keterlambatan, penilaian mentor" />
         <Tile href="/participants" icon="grid" title="Semua peserta" sub="Cari dan buka progres peserta" />
         {me.roles.includes('SUPER_ADMIN') ? <>
           <Tile href="/curricula" icon="layers" title="Kurikulum" sub="Stage, aktivitas, aturan selesai" />
-          <Tile href="/content" icon="file" title="Kelola materi" sub="Modul, SOP, pre/post-test" />
+          <Tile href="/content" icon="file" title="Kelola materi" sub="Perpustakaan modul, SOP, dokumen & tools" />
           <Tile href="/users" icon="shield" title="Pengguna" sub="Karyawan, role, password" />
+          <Tile href="/master" icon="db" title="Master data" sub="Jabatan, outlet, mentor & trainer" />
         </> : null}
       </div>
     </> : null}

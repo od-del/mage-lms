@@ -9,6 +9,7 @@
     "start": "next start",
     "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
     "db:seed": "node --env-file-if-exists=.env.local scripts/seed.mjs",
+    "db:create-admin": "node --env-file-if-exists=.env.local scripts/create-admin.mjs",
     "test:api": "node scripts/smoke.mjs http://localhost:3000 .seed-credentials.txt"
   },
   "engines": { "node": ">=20" },

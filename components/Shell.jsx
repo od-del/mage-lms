@@ -9,17 +9,19 @@ export const NAV = [
   { group: 'Belajar', items: [
     { id: 'home', href: '/', label: 'Beranda', icon: 'home', any: true, bottom: true },
     { id: 'learning', href: '/learning', label: 'Pembelajaran Saya', short: 'Belajar', icon: 'book', role: 'TRAINEE', bottom: true },
-    { id: 'sop', href: '/sop', label: 'SOP', icon: 'doc', any: true, bottom: true }] },
+    { id: 'learned', href: '/learned', label: 'Modul Dipelajari', icon: 'award', role: 'TRAINEE' },
+    { id: 'documents', href: '/documents', label: 'Documents', short: 'Docs', icon: 'doc', any: true, bottom: true }] },
   { group: 'Mentor', items: [
     { id: 'mentees', href: '/mentees', label: 'Trainee Bimbingan', short: 'Bimbingan', icon: 'users', role: 'MENTOR', bottom: true }] },
   { group: 'Admin', items: [
     { id: 'dash', href: '/dashboard', label: 'Dashboard', icon: 'dash', role: 'ADMIN', bottom: true },
     { id: 'all', href: '/participants', label: 'Semua Peserta', icon: 'grid', role: 'ADMIN' },
-    { id: 'enroll', href: '/enroll', label: 'Daftarkan Peserta', icon: 'plus', role: 'ADMIN' }] },
+    { id: 'enroll', href: '/enroll', label: 'Kelola Peserta', icon: 'plus', role: 'ADMIN' }] },
   { group: 'Super Admin', items: [
     { id: 'curricula', href: '/curricula', label: 'Kurikulum', icon: 'layers', role: 'SUPER_ADMIN' },
     { id: 'content', href: '/content', label: 'Kelola Materi', icon: 'file', role: 'SUPER_ADMIN' },
     { id: 'users', href: '/users', label: 'Pengguna', icon: 'shield', role: 'SUPER_ADMIN' },
+    { id: 'master', href: '/master', label: 'Master Data', icon: 'db', role: 'SUPER_ADMIN' },
     { id: 'system', href: '/system', label: 'Sistem', icon: 'cog', role: 'SUPER_ADMIN' }] },
 ];
 
